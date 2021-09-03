@@ -1,29 +1,66 @@
-import {wait} from '../src/wait'
-import * as process from 'process'
-import * as cp from 'child_process'
-import * as path from 'path'
 import {expect, test} from '@jest/globals'
 
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10)
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number')
+import {binaryName, binaryUrl, isWindows} from '../src/install'
+
+test('isWindows(platform: string)', () => {
+  expect(isWindows('win32')).toEqual(true)
+  expect(isWindows('darwin')).toEqual(false)
+  expect(isWindows('linux')).toEqual(false)
 })
 
-test('wait 500 ms', async () => {
-  const start = new Date()
-  await wait(500)
-  const end = new Date()
-  var delta = Math.abs(end.getTime() - start.getTime())
-  expect(delta).toBeGreaterThan(450)
+test('binaryName(platform: string)', () => {
+  expect(binaryName('win32')).toEqual('devspace.exe')
+  expect(binaryName('darwin')).toEqual('devspace')
+  expect(binaryName('linux')).toEqual('devspace')
 })
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500'
-  const np = process.execPath
-  const ip = path.join(__dirname, '..', 'lib', 'main.js')
-  const options: cp.ExecFileSyncOptions = {
-    env: process.env
-  }
-  console.log(cp.execFileSync(np, [ip], options).toString())
+test('binaryUrl(platform: string, architecture: string, version: string)', () => {
+  expect(binaryUrl('darwin', 'arm64', '5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-darwin-arm64'
+  )
+  expect(binaryUrl('darwin', 'amd64', '5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-darwin-amd64'
+  )
+  expect(binaryUrl('darwin', 'x64', '5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-darwin-amd64'
+  )
+  expect(binaryUrl('darwin', 'amd64', '5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-darwin-amd64'
+  )
+  expect(binaryUrl('darwin', 'amd64', 'v5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-darwin-amd64'
+  )
+
+  expect(binaryUrl('linux', 'arm64', '5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-linux-arm64'
+  )
+  expect(binaryUrl('linux', 'amd64', '5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-linux-amd64'
+  )
+  expect(binaryUrl('linux', 'x64', '5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-linux-amd64'
+  )
+  expect(binaryUrl('linux', 'amd64', 'v5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-linux-amd64'
+  )
+
+  expect(binaryUrl('win32', 'amd64', '5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-windows-amd64.exe'
+  )
+  expect(binaryUrl('win32', 'amd64', 'v5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-windows-amd64.exe'
+  )
+  expect(binaryUrl('win32', 'x64', 'v5.14.4')).resolves.toEqual(
+    'https://github.com/loft-sh/devspace/releases/download/v5.14.4/devspace-windows-amd64.exe'
+  )
+
+  expect(binaryUrl('darwin', 'amd64', 'latest')).resolves.toMatch(
+    /https\:\/\/github.com\/loft\-sh\/devspace\/releases\/download\/v\d+\.\d+\.\d+(\-.*)?\/devspace\-darwin\-amd64/
+  )
+  expect(binaryUrl('linux', 'amd64', 'latest')).resolves.toMatch(
+    /https\:\/\/github.com\/loft\-sh\/devspace\/releases\/download\/v\d+\.\d+\.\d+(\-.*)?\/devspace\-linux\-amd64/
+  )
+  expect(binaryUrl('win32', 'amd64', 'latest')).resolves.toMatch(
+    /https\:\/\/github.com\/loft\-sh\/devspace\/releases\/download\/v\d+\.\d+\.\d+(\-.*)?\/devspace\-windows\-amd64/
+  )
 })

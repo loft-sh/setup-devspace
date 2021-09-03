@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
+  "name": "install-devspace-cli",
   "version": "0.0.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "GitHub Action to Install Loft CLI",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -15,20 +15,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/lizardruss/install-devspace-cli.git"
   },
   "keywords": [
     "actions",
-    "node",
-    "setup"
+    "devspace"
   ],
-  "author": "",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.4.0"
+    "@actions/core": "^1.4.0",
+    "@actions/io": "^1.1.1",
+    "@actions/tool-cache": "^1.7.1",
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "@types/node": "^16.3.3",
+    "@types/node-fetch": "^2.5.12",
     "@typescript-eslint/parser": "^4.28.3",
     "@vercel/ncc": "^0.29.0",
     "eslint": "^7.31.0",

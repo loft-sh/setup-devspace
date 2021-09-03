@@ -5,7 +5,6 @@ on: # rebuild any PRs and main branch changes
     branches:
       - main
       - 'releases/*'
-
 jobs:
   build: # make sure build/ci work properly
     runs-on: ubuntu-latest
@@ -16,9 +15,29 @@ jobs:
       - run: |
           npm run all
   test: # make sure the action works on a clean machine without building
-    runs-on: ubuntu-latest
+    env:
+      ACTIONS_STEP_DEBUG: true
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - windows-2022
+          - windows-2019
+          - ubuntu-latest
+          - ubuntu-20.04
+          - ubuntu-18.04
+          # - ubuntu-16.04
+          - macos-latest
+          - macos-11
+          - macos-10.15
+        version:
+          - v5.14.0
+          - 5.14.0
+          - latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          milliseconds: 1000
+          version: ${{ matrix.version }}
+      - run: devspace --version

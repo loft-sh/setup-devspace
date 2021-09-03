@@ -1,18 +1,19 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import * as os from 'os'
+
+import {installDevspace} from './install'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
+    core.startGroup('Install DevSpace CLI')
+    const version: string = core.getInput('version') || 'latest'
+    const runnerPlatform: string = os.platform()
+    const architecture: string = os.arch()
+    await installDevspace(runnerPlatform, architecture, version)
   } catch (error) {
     core.setFailed(error.message)
+  } finally {
+    core.endGroup()
   }
 }
 
