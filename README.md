@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install DevSpace
-        uses: lizardruss/install-devspace-cli
+        uses: lizardruss/install-devspace-cli@main
       - name: Deploy using DevSpace
         run: devspace deploy --namespace staging
 ```
@@ -39,9 +39,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install DevSpace
-        uses: lizardruss/install-devspace-cli
+        uses: lizardruss/install-devspace-cli@main
         with:
           version: v5.15.0
+      - name: Show Version
+        run: devspace --version
+```
+
+
+### Example: Install DevSpace and the Loft DevSpace Plugin
+```yaml
+name: devspace version
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install DevSpace
+        uses: lizardruss/install-devspace-cli@main
+        with:
+          loft-plugin-enabled: true
       - name: Show Version
         run: devspace --version
 ```
@@ -52,6 +72,8 @@ jobs:
 
 The following inputs can be used as `step.with` keys
 
-| Name                | Type     | Description                        |
-|---------------------|----------|------------------------------------|
-| `version`           | String   | The version of DevSpace CLI to install. See [DevSpace Releases](https://github.com/loft-sh/devspace/releases), for available versions.
+| Name                     | Type     | Description                                          |
+|--------------------------|----------|------------------------------------------------------|
+| `version`                | String   | The version of DevSpace CLI to install. See [DevSpace Releases](https://github.com/loft-sh/devspace/releases), for available versions.
+| `loft-plugin-enabled`    | Boolean  | Install the Loft DevSpace Plugin. Defaults to false  |
+| `loft-plugin-version`    | String   | The version of the Loft DevSpace Plugin to install   |

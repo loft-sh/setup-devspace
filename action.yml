@@ -6,6 +6,13 @@ inputs:
     description: 'The version of devspace to install'
     required: false
     default: 'latest'
+  loft-plugin-enabled:
+    description: 'Install the Loft Devspace Plugin'
+    required: false
+    default: false
+  loft-plugin-version:
+    decription: 'The version of the Loft Devspace Plugin to insall'
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'
