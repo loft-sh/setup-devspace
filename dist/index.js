@@ -1,7 +1,7 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 39:
+/***/ 1:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -38,48 +38,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.installDevspace = exports.getLatestVersion = exports.binaryUrl = exports.binaryName = exports.isWindows = void 0;
+exports.installDevspace = exports.getLatestVersion = exports.binaryUrl = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const tc = __importStar(__nccwpck_require__(784));
 const fs = __importStar(__nccwpck_require__(747));
 const path = __importStar(__nccwpck_require__(622));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
-const platformUrlMapping = {
-    linux: 'linux',
-    darwin: 'darwin',
-    win32: 'windows'
-};
-const architectureMapping = {
-    amd64: 'amd64',
-    arm64: 'arm64',
-    x64: 'amd64'
-};
-function isWindows(platform) {
-    return platform.startsWith('win');
-}
-exports.isWindows = isWindows;
-function binaryName(platform) {
-    return isWindows(platform) ? 'devspace.exe' : 'devspace';
-}
-exports.binaryName = binaryName;
+const util_1 = __nccwpck_require__(24);
 function binaryUrl(platform, architecture, version) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!(platform in platformUrlMapping)) {
-            throw new Error(`Unsupported operating system ${platform} - DevSpace is only released for Darwin, Linux and Windows`);
+        let sanitizedArchitecture;
+        try {
+            sanitizedArchitecture = util_1.getArchitecture(architecture);
         }
-        if (!(architecture in architectureMapping)) {
-            throw new Error(`Unsupported architecture ${platform}`);
+        catch (error) {
+            throw new Error(`Unsupported architecture ${architecture}`);
+        }
+        let sanitizedPlatform;
+        try {
+            sanitizedPlatform = util_1.getPlatform(platform);
+        }
+        catch (error) {
+            throw new Error(`Unsupported operating system ${platform} - DevSpace is only released for Darwin, Linux and Windows`);
         }
         let sanitizedVerson = version;
         if (version === 'latest') {
             sanitizedVerson = yield getLatestVersion();
         }
-        if (!sanitizedVerson.startsWith('v')) {
-            sanitizedVerson = `v${sanitizedVerson}`;
-        }
-        const sanitizedArchitecture = architectureMapping[architecture];
-        const sanitizedPlatform = platformUrlMapping[platform];
-        const binaryExt = isWindows(platform) ? '.exe' : '';
+        sanitizedVerson = util_1.getGitVersion(sanitizedVerson);
+        const binaryExt = util_1.isWindows(platform) ? '.exe' : '';
         return `https://github.com/loft-sh/devspace/releases/download/${sanitizedVerson}/devspace-${sanitizedPlatform}-${sanitizedArchitecture}${binaryExt}`;
     });
 }
@@ -104,31 +91,169 @@ function getLatestVersion() {
 exports.getLatestVersion = getLatestVersion;
 function installDevspace(platform, architecture, version) {
     return __awaiter(this, void 0, void 0, function* () {
-        const cliName = binaryName(platform);
-        core.info(`Checking for cached devspace: ${version}`);
-        const cachedDir = tc.find(cliName, version);
+        const cliName = util_1.binaryName(platform, 'devspace');
+        let sanitizedVerson = version;
+        if (version === 'latest') {
+            sanitizedVerson = yield getLatestVersion();
+        }
+        sanitizedVerson = util_1.getGitVersion(sanitizedVerson);
+        core.info(`Checking for cached devspace: ${sanitizedVerson}`);
+        const cachedDir = tc.find(cliName, sanitizedVerson);
         if (cachedDir) {
-            core.info(`Cached devspace found: ${version}`);
+            core.info(`Cached devspace found: ${sanitizedVerson}`);
             core.addPath(cachedDir);
             return path.join(cachedDir, cliName);
         }
         core.info(`Downloading devspace:`);
         core.info(`- platform:     ${platform}`);
         core.info(`- architecture: ${architecture}`);
-        core.info(`- version:      ${version}`);
-        const devspaceUrl = yield binaryUrl(platform, architecture, version);
+        core.info(`- version:      ${sanitizedVerson}`);
+        const devspaceUrl = yield binaryUrl(platform, architecture, sanitizedVerson);
         const downloadDir = yield tc.downloadTool(devspaceUrl);
-        const cliDir = yield tc.cacheFile(downloadDir, cliName, cliName, version, architecture);
+        const cliDir = yield tc.cacheFile(downloadDir, cliName, cliName, sanitizedVerson, architecture);
         const cliPath = path.join(cliDir, cliName);
-        if (!isWindows(platform)) {
+        if (!util_1.isWindows(platform)) {
             fs.chmodSync(cliPath, 0o555);
         }
-        core.info(`Successfully downloaded devspace: ${version}`);
+        core.info(`Successfully downloaded devspace: ${sanitizedVerson}`);
         core.addPath(cliDir);
         return path.join(cliDir, cliName);
     });
 }
 exports.installDevspace = installDevspace;
+
+
+/***/ }),
+
+/***/ 334:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.installKubectl = exports.getLatestVersion = exports.binaryUrl = void 0;
+const core = __importStar(__nccwpck_require__(186));
+const exec_1 = __nccwpck_require__(514);
+const io = __importStar(__nccwpck_require__(436));
+const tc = __importStar(__nccwpck_require__(784));
+const fs = __importStar(__nccwpck_require__(747));
+const node_fetch_1 = __importDefault(__nccwpck_require__(467));
+const path = __importStar(__nccwpck_require__(622));
+const util_1 = __nccwpck_require__(24);
+function binaryUrl(platform, architecture, version) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let sanitizedArchitecture;
+        try {
+            sanitizedArchitecture = util_1.getArchitecture(architecture);
+        }
+        catch (error) {
+            throw new Error(`Unsupported architecture ${architecture}`);
+        }
+        let sanitizedPlatform;
+        try {
+            sanitizedPlatform = util_1.getPlatform(platform);
+        }
+        catch (error) {
+            throw new Error(`Unsupported operating system ${platform} - kubectl is only released for Darwin, Linux and Windows`);
+        }
+        const sanitizedVerson = util_1.getGitVersion(version);
+        return `https://dl.k8s.io/release/${sanitizedVerson}/bin/${sanitizedPlatform}/${sanitizedArchitecture}/${util_1.binaryName(platform, 'kubectl')}`;
+    });
+}
+exports.binaryUrl = binaryUrl;
+function getLatestVersion() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield node_fetch_1.default('https://storage.googleapis.com/kubernetes-release/release/stable.txt');
+        return response.text();
+    });
+}
+exports.getLatestVersion = getLatestVersion;
+function getInstalledVersion() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const { stdout } = yield exec_1.getExecOutput(`kubectl version --client --output json`);
+            const { clientVersion: { gitVersion } } = JSON.parse(stdout);
+            return util_1.getGitVersion(gitVersion);
+        }
+        catch (error) {
+            core.debug(`determining kubectl version failed: ${error.message}`);
+            throw error;
+        }
+    });
+}
+function installKubectl(platform, architecture, version) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const cliName = util_1.binaryName(platform, 'kubectl');
+        let sanitizedVerson = version;
+        if (version === 'latest') {
+            sanitizedVerson = yield getLatestVersion();
+        }
+        sanitizedVerson = util_1.getGitVersion(sanitizedVerson);
+        core.info(`Checking for installed kubectl: ${sanitizedVerson}`);
+        const existingCliPath = yield io.which(cliName);
+        if (existingCliPath !== '') {
+            const installedVersion = yield getInstalledVersion();
+            core.info(`Found installed kubectl: ${installedVersion}`);
+            const requestedVersion = util_1.getGitVersion(sanitizedVerson);
+            if (installedVersion === requestedVersion) {
+                return existingCliPath;
+            }
+        }
+        core.info(`Checking for cached kubectl: ${sanitizedVerson}`);
+        const cachedDir = tc.find(cliName, sanitizedVerson);
+        if (cachedDir) {
+            core.info(`Found cached kubectl: ${sanitizedVerson}`);
+            core.addPath(cachedDir);
+            return path.join(cachedDir, cliName);
+        }
+        core.info(`Downloading kubectl:`);
+        core.info(`- platform:     ${platform}`);
+        core.info(`- architecture: ${architecture}`);
+        core.info(`- version:      ${sanitizedVerson}`);
+        const kubectlUrl = yield binaryUrl(platform, architecture, sanitizedVerson);
+        const downloadDir = yield tc.downloadTool(kubectlUrl);
+        const cliDir = yield tc.cacheFile(downloadDir, cliName, cliName, sanitizedVerson, architecture);
+        const cliPath = path.join(cliDir, cliName);
+        if (!util_1.isWindows(platform)) {
+            fs.chmodSync(cliPath, 0o555);
+        }
+        core.info(`Successfully downloaded kubectl: ${sanitizedVerson}`);
+        core.addPath(cliDir);
+        return path.join(cliDir, cliName);
+    });
+}
+exports.installKubectl = installKubectl;
 
 
 /***/ }),
@@ -169,16 +294,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const os = __importStar(__nccwpck_require__(87));
-const install_1 = __nccwpck_require__(39);
-const plugin_1 = __nccwpck_require__(315);
+const devspace_1 = __nccwpck_require__(1);
+const kubectl_1 = __nccwpck_require__(334);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        const runnerPlatform = os.platform();
+        const architecture = os.arch();
         try {
             core.startGroup('Install DevSpace CLI');
             const version = core.getInput('version') || 'latest';
-            const runnerPlatform = os.platform();
-            const architecture = os.arch();
-            yield install_1.installDevspace(runnerPlatform, architecture, version);
+            yield devspace_1.installDevspace(runnerPlatform, architecture, version);
         }
         catch (error) {
             core.setFailed(error.message);
@@ -186,12 +311,12 @@ function run() {
         finally {
             core.endGroup();
         }
-        const loftPluginEnabled = core.getBooleanInput('loft-plugin-enabled') || false;
-        if (loftPluginEnabled) {
+        const kubectlInstallEnabled = core.getBooleanInput('kubectl-install') || true;
+        if (kubectlInstallEnabled) {
             try {
-                core.startGroup('Install DevSpace Loft Plugin');
-                const loftPluginVersion = core.getInput('loft-plugin-version');
-                yield plugin_1.installPlugin(plugin_1.LOFT_PLUGIN_URL, loftPluginVersion);
+                core.startGroup('Install kubectl');
+                const kubectlVersion = core.getInput('kubectl-version') || 'latest';
+                yield kubectl_1.installKubectl(runnerPlatform, architecture, kubectlVersion);
             }
             catch (error) {
                 core.setFailed(error.message);
@@ -207,77 +332,52 @@ run();
 
 /***/ }),
 
-/***/ 315:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ 24:
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.installPlugin = exports.getAddPluginCommand = exports.LOFT_PLUGIN_URL = void 0;
-const core = __importStar(__nccwpck_require__(186));
-const exec_1 = __nccwpck_require__(514);
-const url_1 = __nccwpck_require__(835);
-exports.LOFT_PLUGIN_URL = 'https://github.com/loft-sh/devspace-plugin-loft';
-function getAddPluginCommand(url, version = '') {
-    if (url === '') {
-        throw new Error('No plugin url provided');
-    }
-    try {
-        new url_1.URL(url);
-    }
-    catch (error) {
-        throw new Error('Invalid plugin url provided');
-    }
-    return version !== ''
-        ? `devspace add plugin ${url} --version ${version}`
-        : `devspace add plugin ${url}`;
+exports.getGitVersion = exports.getArchitecture = exports.getPlatform = exports.binaryName = exports.isWindows = void 0;
+function isWindows(platform) {
+    return platform.startsWith('win');
 }
-exports.getAddPluginCommand = getAddPluginCommand;
-function installPlugin(url, version) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            yield exec_1.exec(getAddPluginCommand(url, version));
-        }
-        catch (error) {
-            core.debug(`Add plugin command failed:
-- command:  ${error.cmd}
-- exitCode: ${error.code}
-- stdout:   ${error.stdout}
-- stderr:   ${error.stderr}
-`);
-            throw error;
-        }
-    });
+exports.isWindows = isWindows;
+function binaryName(platform, name) {
+    return isWindows(platform) ? `${name}.exe` : name;
 }
-exports.installPlugin = installPlugin;
+exports.binaryName = binaryName;
+const platformUrlMapping = {
+    linux: 'linux',
+    darwin: 'darwin',
+    win32: 'windows'
+};
+function getPlatform(platform) {
+    if (!(platform in platformUrlMapping)) {
+        throw new Error(`platform ${platform} is not supported`);
+    }
+    return platformUrlMapping[platform];
+}
+exports.getPlatform = getPlatform;
+const architectureMapping = {
+    amd64: 'amd64',
+    arm64: 'arm64',
+    x64: 'amd64'
+};
+function getArchitecture(architecture) {
+    if (!(architecture in architectureMapping)) {
+        throw new Error(`architecture ${architecture} is not supported`);
+    }
+    return architectureMapping[architecture];
+}
+exports.getArchitecture = getArchitecture;
+function getGitVersion(version) {
+    if (!version.startsWith('v')) {
+        return `v${version}`;
+    }
+    return version;
+}
+exports.getGitVersion = getGitVersion;
 
 
 /***/ }),

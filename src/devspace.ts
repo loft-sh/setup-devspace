@@ -3,53 +3,41 @@ import * as tc from '@actions/tool-cache'
 import * as fs from 'fs'
 import * as path from 'path'
 import fetch from 'node-fetch'
-
-const platformUrlMapping: {[key: string]: string} = {
-  linux: 'linux',
-  darwin: 'darwin',
-  win32: 'windows'
-}
-
-const architectureMapping: {[key: string]: string} = {
-  amd64: 'amd64',
-  arm64: 'arm64',
-  x64: 'amd64'
-}
-
-export function isWindows(platform: string): boolean {
-  return platform.startsWith('win')
-}
-
-export function binaryName(platform: string): string {
-  return isWindows(platform) ? 'devspace.exe' : 'devspace'
-}
+import {
+  binaryName,
+  getArchitecture,
+  getGitVersion,
+  getPlatform,
+  isWindows
+} from './util'
 
 export async function binaryUrl(
   platform: string,
   architecture: string,
   version: string
 ): Promise<string> {
-  if (!(platform in platformUrlMapping)) {
+  let sanitizedArchitecture
+  try {
+    sanitizedArchitecture = getArchitecture(architecture)
+  } catch (error) {
+    throw new Error(`Unsupported architecture ${architecture}`)
+  }
+
+  let sanitizedPlatform
+  try {
+    sanitizedPlatform = getPlatform(platform)
+  } catch (error) {
     throw new Error(
       `Unsupported operating system ${platform} - DevSpace is only released for Darwin, Linux and Windows`
     )
-  }
-
-  if (!(architecture in architectureMapping)) {
-    throw new Error(`Unsupported architecture ${platform}`)
   }
 
   let sanitizedVerson = version
   if (version === 'latest') {
     sanitizedVerson = await getLatestVersion()
   }
+  sanitizedVerson = getGitVersion(sanitizedVerson)
 
-  if (!sanitizedVerson.startsWith('v')) {
-    sanitizedVerson = `v${sanitizedVerson}`
-  }
-
-  const sanitizedArchitecture = architectureMapping[architecture]
-  const sanitizedPlatform = platformUrlMapping[platform]
   const binaryExt = isWindows(platform) ? '.exe' : ''
   return `https://github.com/loft-sh/devspace/releases/download/${sanitizedVerson}/devspace-${sanitizedPlatform}-${sanitizedArchitecture}${binaryExt}`
 }
@@ -80,12 +68,18 @@ export async function installDevspace(
   architecture: string,
   version: string
 ): Promise<string> {
-  const cliName = binaryName(platform)
+  const cliName = binaryName(platform, 'devspace')
 
-  core.info(`Checking for cached devspace: ${version}`)
-  const cachedDir = tc.find(cliName, version)
+  let sanitizedVerson = version
+  if (version === 'latest') {
+    sanitizedVerson = await getLatestVersion()
+  }
+  sanitizedVerson = getGitVersion(sanitizedVerson)
+
+  core.info(`Checking for cached devspace: ${sanitizedVerson}`)
+  const cachedDir = tc.find(cliName, sanitizedVerson)
   if (cachedDir) {
-    core.info(`Cached devspace found: ${version}`)
+    core.info(`Cached devspace found: ${sanitizedVerson}`)
     core.addPath(cachedDir)
     return path.join(cachedDir, cliName)
   }
@@ -93,14 +87,14 @@ export async function installDevspace(
   core.info(`Downloading devspace:`)
   core.info(`- platform:     ${platform}`)
   core.info(`- architecture: ${architecture}`)
-  core.info(`- version:      ${version}`)
-  const devspaceUrl = await binaryUrl(platform, architecture, version)
+  core.info(`- version:      ${sanitizedVerson}`)
+  const devspaceUrl = await binaryUrl(platform, architecture, sanitizedVerson)
   const downloadDir = await tc.downloadTool(devspaceUrl)
   const cliDir = await tc.cacheFile(
     downloadDir,
     cliName,
     cliName,
-    version,
+    sanitizedVerson,
     architecture
   )
 
@@ -109,7 +103,7 @@ export async function installDevspace(
     fs.chmodSync(cliPath, 0o555)
   }
 
-  core.info(`Successfully downloaded devspace: ${version}`)
+  core.info(`Successfully downloaded devspace: ${sanitizedVerson}`)
   core.addPath(cliDir)
   return path.join(cliDir, cliName)
 }
