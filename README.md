@@ -1,8 +1,8 @@
 <p align="center">
-  <a href="https://github.com/lizardruss/install-devspace-cli/actions"><img alt="install-devspace-cli status" src="https://github.com/lizardruss/install-devspace-cli/workflows/build-test/badge.svg"></a>
+  <a href="https://github.com/loft-sh/setup-devspace/actions"><img alt="install-devspace-cli status" src="https://github.com/loft-sh/setup-devspace/workflows/build-test/badge.svg"></a>
 </p>
 
-# Install DevSpace CLI GitHub Action
+# setup-devspace
 
 This is a GitHub Action to install the DevSpace CLI. Windows, Mac, and Linux runners are supported.
 
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install DevSpace
-        uses: lizardruss/install-devspace-cli@main
+        uses: loft-sh/setup-devspace@main
       - name: Deploy using DevSpace
         run: devspace deploy --namespace staging
 ```
@@ -39,17 +39,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install DevSpace
-        uses: lizardruss/install-devspace-cli@main
+        uses: loft-sh/setup-devspace@main
         with:
           version: v5.15.0
       - name: Show Version
         run: devspace --version
 ```
 
+## Install `kubectl`
 
-### Example: Install DevSpace and the Loft DevSpace Plugin
+Options are provided to install `kubectl`. Many GitHub runners now come with `kubectl` pre-installed, however this allows for controlling the version of `kubectl` if desired.
+
+### Example: Install DevSpace and a specific version of kubectl
 ```yaml
-name: devspace version
+name: devspace and kubectl version
 on:
   push:
     branches:
@@ -59,9 +62,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install DevSpace
-        uses: lizardruss/install-devspace-cli@main
+        uses: loft-sh/setup-devspace@main
         with:
-          loft-plugin-enabled: true
+          kubectl-install: true
+          kubectl-version: v1.21.0
       - name: Show Version
         run: devspace --version
 ```
@@ -75,5 +79,5 @@ The following inputs can be used as `step.with` keys
 | Name                     | Type     | Description                                          |
 |--------------------------|----------|------------------------------------------------------|
 | `version`                | String   | The version of DevSpace CLI to install. See [DevSpace Releases](https://github.com/loft-sh/devspace/releases), for available versions.
-| `loft-plugin-enabled`    | Boolean  | Install the Loft DevSpace Plugin. Defaults to false  |
-| `loft-plugin-version`    | String   | The version of the Loft DevSpace Plugin to install   |
+| `kubectl-install`        | Boolean  | Install kubectl if not already installed
+| `kubectl-version`        | String   | The version of the kubectl to install
