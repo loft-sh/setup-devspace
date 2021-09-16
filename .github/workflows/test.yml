@@ -15,8 +15,6 @@ jobs:
       - run: |
           npm run all
   test:
-    env:
-      ACTIONS_STEP_DEBUG: true
     strategy:
       matrix:
         os:
@@ -26,7 +24,6 @@ jobs:
           - ubuntu-latest
           - ubuntu-20.04
           - ubuntu-18.04
-          # - ubuntu-16.04
           - macos-latest
           - macos-11
           - macos-10.15
@@ -34,6 +31,7 @@ jobs:
           - v5.14.0
           - 5.14.0
           - latest
+          - ~
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -41,24 +39,30 @@ jobs:
         with:
           version: ${{ matrix.version }}
       - run: devspace --version
-  test-loft-plugin-latest:
-    env:
-      ACTIONS_STEP_DEBUG: true
-    runs-on: ubuntu-latest
+  test-kubectl-install:
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - windows-2022
+          - windows-2019
+          - ubuntu-latest
+          - ubuntu-20.04
+          - ubuntu-18.04
+          - macos-latest
+          - macos-11
+          - macos-10.15
+        kubectl-version:
+          - v1.21.0
+          - 1.21.0
+          - latest
+          - ~
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          loft-plugin-enabled: true
-      - run: devspace --help
-  test-loft-plugin-version:
-      env:
-        ACTIONS_STEP_DEBUG: true
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - uses: ./
-          with:
-            loft-plugin-enabled: true
-            loft-plugin-version: v1.13.1
-        - run: devspace --help
+          version: latest
+          kubectl-install: true
+          kubectl-version: ${{ matrix.kubectl-version }}
+      - run: kubectl version --client --short
