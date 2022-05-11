@@ -49,14 +49,14 @@ function binaryUrl(platform, architecture, version) {
     return __awaiter(this, void 0, void 0, function* () {
         let sanitizedArchitecture;
         try {
-            sanitizedArchitecture = util_1.getArchitecture(architecture);
+            sanitizedArchitecture = (0, util_1.getArchitecture)(architecture);
         }
         catch (error) {
             throw new Error(`Unsupported architecture ${architecture}`);
         }
         let sanitizedPlatform;
         try {
-            sanitizedPlatform = util_1.getPlatform(platform);
+            sanitizedPlatform = (0, util_1.getPlatform)(platform);
         }
         catch (error) {
             throw new Error(`Unsupported operating system ${platform} - DevSpace is only released for Darwin, Linux and Windows`);
@@ -65,15 +65,15 @@ function binaryUrl(platform, architecture, version) {
         if (version === 'latest') {
             sanitizedVerson = yield getLatestVersion();
         }
-        sanitizedVerson = util_1.getGitVersion(sanitizedVerson);
-        const binaryExt = util_1.isWindows(platform) ? '.exe' : '';
+        sanitizedVerson = (0, util_1.getGitVersion)(sanitizedVerson);
+        const binaryExt = (0, util_1.isWindows)(platform) ? '.exe' : '';
         return `https://github.com/loft-sh/devspace/releases/download/${sanitizedVerson}/devspace-${sanitizedPlatform}-${sanitizedArchitecture}${binaryExt}`;
     });
 }
 exports.binaryUrl = binaryUrl;
 function getLatestVersion() {
     return __awaiter(this, void 0, void 0, function* () {
-        const response = yield node_fetch_1.default('https://github.com/loft-sh/devspace/releases/latest', {
+        const response = yield (0, node_fetch_1.default)('https://github.com/loft-sh/devspace/releases/latest', {
             redirect: 'manual'
         });
         const redirectUrl = response.headers.get('location');
@@ -91,12 +91,12 @@ function getLatestVersion() {
 exports.getLatestVersion = getLatestVersion;
 function installDevspace(platform, architecture, version) {
     return __awaiter(this, void 0, void 0, function* () {
-        const cliName = util_1.binaryName(platform, 'devspace');
+        const cliName = (0, util_1.binaryName)(platform, 'devspace');
         let sanitizedVerson = version;
         if (version === 'latest') {
             sanitizedVerson = yield getLatestVersion();
         }
-        sanitizedVerson = util_1.getGitVersion(sanitizedVerson);
+        sanitizedVerson = (0, util_1.getGitVersion)(sanitizedVerson);
         core.info(`Checking for cached devspace: ${sanitizedVerson}`);
         const cachedDir = tc.find(cliName, sanitizedVerson);
         if (cachedDir) {
@@ -112,7 +112,7 @@ function installDevspace(platform, architecture, version) {
         const downloadDir = yield tc.downloadTool(devspaceUrl);
         const cliDir = yield tc.cacheFile(downloadDir, cliName, cliName, sanitizedVerson, architecture);
         const cliPath = path.join(cliDir, cliName);
-        if (!util_1.isWindows(platform)) {
+        if (!(0, util_1.isWindows)(platform)) {
             fs.chmodSync(cliPath, 0o555);
         }
         core.info(`Successfully downloaded devspace: ${sanitizedVerson}`);
@@ -175,26 +175,26 @@ function binaryUrl(platform, architecture, version) {
     return __awaiter(this, void 0, void 0, function* () {
         let sanitizedArchitecture;
         try {
-            sanitizedArchitecture = util_1.getArchitecture(architecture);
+            sanitizedArchitecture = (0, util_1.getArchitecture)(architecture);
         }
         catch (error) {
             throw new Error(`Unsupported architecture ${architecture}`);
         }
         let sanitizedPlatform;
         try {
-            sanitizedPlatform = util_1.getPlatform(platform);
+            sanitizedPlatform = (0, util_1.getPlatform)(platform);
         }
         catch (error) {
             throw new Error(`Unsupported operating system ${platform} - kubectl is only released for Darwin, Linux and Windows`);
         }
-        const sanitizedVerson = util_1.getGitVersion(version);
-        return `https://dl.k8s.io/release/${sanitizedVerson}/bin/${sanitizedPlatform}/${sanitizedArchitecture}/${util_1.binaryName(platform, 'kubectl')}`;
+        const sanitizedVerson = (0, util_1.getGitVersion)(version);
+        return `https://dl.k8s.io/release/${sanitizedVerson}/bin/${sanitizedPlatform}/${sanitizedArchitecture}/${(0, util_1.binaryName)(platform, 'kubectl')}`;
     });
 }
 exports.binaryUrl = binaryUrl;
 function getLatestVersion() {
     return __awaiter(this, void 0, void 0, function* () {
-        const response = yield node_fetch_1.default('https://storage.googleapis.com/kubernetes-release/release/stable.txt');
+        const response = yield (0, node_fetch_1.default)('https://storage.googleapis.com/kubernetes-release/release/stable.txt');
         return response.text();
     });
 }
@@ -202,30 +202,32 @@ exports.getLatestVersion = getLatestVersion;
 function getInstalledVersion() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { stdout } = yield exec_1.getExecOutput(`kubectl version --client --output json`);
+            const { stdout } = yield (0, exec_1.getExecOutput)(`kubectl version --client --output json`);
             const { clientVersion: { gitVersion } } = JSON.parse(stdout);
-            return util_1.getGitVersion(gitVersion);
+            return (0, util_1.getGitVersion)(gitVersion);
         }
         catch (error) {
-            core.debug(`determining kubectl version failed: ${error.message}`);
+            if (error instanceof Error) {
+                core.debug(`determining kubectl version failed: ${error.message}`);
+            }
             throw error;
         }
     });
 }
 function installKubectl(platform, architecture, version) {
     return __awaiter(this, void 0, void 0, function* () {
-        const cliName = util_1.binaryName(platform, 'kubectl');
+        const cliName = (0, util_1.binaryName)(platform, 'kubectl');
         let sanitizedVerson = version;
         if (version === 'latest') {
             sanitizedVerson = yield getLatestVersion();
         }
-        sanitizedVerson = util_1.getGitVersion(sanitizedVerson);
+        sanitizedVerson = (0, util_1.getGitVersion)(sanitizedVerson);
         core.info(`Checking for installed kubectl: ${sanitizedVerson}`);
         const existingCliPath = yield io.which(cliName);
         if (existingCliPath !== '') {
             const installedVersion = yield getInstalledVersion();
             core.info(`Found installed kubectl: ${installedVersion}`);
-            const requestedVersion = util_1.getGitVersion(sanitizedVerson);
+            const requestedVersion = (0, util_1.getGitVersion)(sanitizedVerson);
             if (installedVersion === requestedVersion) {
                 return existingCliPath;
             }
@@ -245,7 +247,7 @@ function installKubectl(platform, architecture, version) {
         const downloadDir = yield tc.downloadTool(kubectlUrl);
         const cliDir = yield tc.cacheFile(downloadDir, cliName, cliName, sanitizedVerson, architecture);
         const cliPath = path.join(cliDir, cliName);
-        if (!util_1.isWindows(platform)) {
+        if (!(0, util_1.isWindows)(platform)) {
             fs.chmodSync(cliPath, 0o555);
         }
         core.info(`Successfully downloaded kubectl: ${sanitizedVerson}`);
@@ -303,10 +305,12 @@ function run() {
         try {
             core.startGroup('Install DevSpace CLI');
             const version = core.getInput('version') || 'latest';
-            yield devspace_1.installDevspace(runnerPlatform, architecture, version);
+            yield (0, devspace_1.installDevspace)(runnerPlatform, architecture, version);
         }
         catch (error) {
-            core.setFailed(error.message);
+            if (error instanceof Error) {
+                core.setFailed(error.message);
+            }
         }
         finally {
             core.endGroup();
@@ -316,10 +320,12 @@ function run() {
             try {
                 core.startGroup('Install kubectl');
                 const kubectlVersion = core.getInput('kubectl-version') || 'latest';
-                yield kubectl_1.installKubectl(runnerPlatform, architecture, kubectlVersion);
+                yield (0, kubectl_1.installKubectl)(runnerPlatform, architecture, kubectlVersion);
             }
             catch (error) {
-                core.setFailed(error.message);
+                if (error instanceof Error) {
+                    core.setFailed(error.message);
+                }
             }
             finally {
                 core.endGroup();
@@ -515,7 +521,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
+exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
 const command_1 = __nccwpck_require__(351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(278);
@@ -693,19 +699,30 @@ exports.debug = debug;
 /**
  * Adds an error issue
  * @param message error issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
  */
-function error(message) {
-    command_1.issue('error', message instanceof Error ? message.toString() : message);
+function error(message, properties = {}) {
+    command_1.issueCommand('error', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 exports.error = error;
 /**
- * Adds an warning issue
+ * Adds a warning issue
  * @param message warning issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
  */
-function warning(message) {
-    command_1.issue('warning', message instanceof Error ? message.toString() : message);
+function warning(message, properties = {}) {
+    command_1.issueCommand('warning', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 exports.warning = warning;
+/**
+ * Adds a notice issue
+ * @param message notice issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function notice(message, properties = {}) {
+    command_1.issueCommand('notice', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
+exports.notice = notice;
 /**
  * Writes info to log with console.log.
  * @param message info message
@@ -839,7 +856,7 @@ exports.issueCommand = issueCommand;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.toCommandValue = void 0;
+exports.toCommandProperties = exports.toCommandValue = void 0;
 /**
  * Sanitizes an input into a string so it can be passed into issueCommand safely
  * @param input input to sanitize into a string
@@ -854,6 +871,25 @@ function toCommandValue(input) {
     return JSON.stringify(input);
 }
 exports.toCommandValue = toCommandValue;
+/**
+ *
+ * @param annotationProperties
+ * @returns The command properties to send with the actual annotation command
+ * See IssueCommandProperties: https://github.com/actions/runner/blob/main/src/Runner.Worker/ActionCommandManager.cs#L646
+ */
+function toCommandProperties(annotationProperties) {
+    if (!Object.keys(annotationProperties).length) {
+        return {};
+    }
+    return {
+        title: annotationProperties.title,
+        line: annotationProperties.startLine,
+        endLine: annotationProperties.endLine,
+        col: annotationProperties.startColumn,
+        endColumn: annotationProperties.endColumn
+    };
+}
+exports.toCommandProperties = toCommandProperties;
 //# sourceMappingURL=utils.js.map
 
 /***/ }),

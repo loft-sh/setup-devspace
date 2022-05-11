@@ -59,8 +59,10 @@ async function getInstalledVersion(): Promise<string> {
       clientVersion: {gitVersion}
     } = JSON.parse(stdout)
     return getGitVersion(gitVersion)
-  } catch (error) {
-    core.debug(`determining kubectl version failed: ${error.message}`)
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      core.debug(`determining kubectl version failed: ${error.message}`)
+    }
     throw error
   }
 }

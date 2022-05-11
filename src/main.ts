@@ -12,8 +12,10 @@ async function run(): Promise<void> {
     core.startGroup('Install DevSpace CLI')
     const version: string = core.getInput('version') || 'latest'
     await installDevspace(runnerPlatform, architecture, version)
-  } catch (error) {
-    core.setFailed(error.message)
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      core.setFailed(error.message)
+    }
   } finally {
     core.endGroup()
   }
@@ -24,8 +26,10 @@ async function run(): Promise<void> {
       core.startGroup('Install kubectl')
       const kubectlVersion = core.getInput('kubectl-version') || 'latest'
       await installKubectl(runnerPlatform, architecture, kubectlVersion)
-    } catch (error) {
-      core.setFailed(error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        core.setFailed(error.message)
+      }
     } finally {
       core.endGroup()
     }
