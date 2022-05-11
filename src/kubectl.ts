@@ -1,10 +1,10 @@
 import * as core from '@actions/core'
 import {getExecOutput} from '@actions/exec'
-import * as io from '@actions/io'
-import * as tc from '@actions/tool-cache'
-import * as fs from 'fs'
+import {which} from '@actions/io'
+import {cacheFile, downloadTool, find} from '@actions/tool-cache'
+import {chmodSync} from 'fs'
 import fetch from 'node-fetch'
-import * as path from 'path'
+import {join} from 'path'
 
 import {
   binaryName,
@@ -81,7 +81,7 @@ export async function installKubectl(
   sanitizedVerson = getGitVersion(sanitizedVerson)
 
   core.info(`Checking for installed kubectl: ${sanitizedVerson}`)
-  const existingCliPath = await io.which(cliName)
+  const existingCliPath = await which(cliName)
   if (existingCliPath !== '') {
     const installedVersion = await getInstalledVersion()
     core.info(`Found installed kubectl: ${installedVersion}`)
@@ -93,11 +93,11 @@ export async function installKubectl(
   }
 
   core.info(`Checking for cached kubectl: ${sanitizedVerson}`)
-  const cachedDir = tc.find(cliName, sanitizedVerson)
+  const cachedDir = find(cliName, sanitizedVerson)
   if (cachedDir) {
     core.info(`Found cached kubectl: ${sanitizedVerson}`)
     core.addPath(cachedDir)
-    return path.join(cachedDir, cliName)
+    return join(cachedDir, cliName)
   }
 
   core.info(`Downloading kubectl:`)
@@ -105,8 +105,8 @@ export async function installKubectl(
   core.info(`- architecture: ${architecture}`)
   core.info(`- version:      ${sanitizedVerson}`)
   const kubectlUrl = await binaryUrl(platform, architecture, sanitizedVerson)
-  const downloadDir = await tc.downloadTool(kubectlUrl)
-  const cliDir = await tc.cacheFile(
+  const downloadDir = await downloadTool(kubectlUrl)
+  const cliDir = await cacheFile(
     downloadDir,
     cliName,
     cliName,
@@ -114,12 +114,12 @@ export async function installKubectl(
     architecture
   )
 
-  const cliPath = path.join(cliDir, cliName)
+  const cliPath = join(cliDir, cliName)
   if (!isWindows(platform)) {
-    fs.chmodSync(cliPath, 0o555)
+    chmodSync(cliPath, 0o555)
   }
 
   core.info(`Successfully downloaded kubectl: ${sanitizedVerson}`)
   core.addPath(cliDir)
-  return path.join(cliDir, cliName)
+  return join(cliDir, cliName)
 }

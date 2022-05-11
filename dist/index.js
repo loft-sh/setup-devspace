@@ -42,8 +42,8 @@ exports.installDevspace = exports.getLatestVersion = exports.binaryUrl = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const tc = __importStar(__nccwpck_require__(784));
 const fs = __importStar(__nccwpck_require__(747));
-const path = __importStar(__nccwpck_require__(622));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
+const path_1 = __nccwpck_require__(622);
 const util_1 = __nccwpck_require__(24);
 function binaryUrl(platform, architecture, version) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -102,7 +102,7 @@ function installDevspace(platform, architecture, version) {
         if (cachedDir) {
             core.info(`Cached devspace found: ${sanitizedVerson}`);
             core.addPath(cachedDir);
-            return path.join(cachedDir, cliName);
+            return (0, path_1.join)(cachedDir, cliName);
         }
         core.info(`Downloading devspace:`);
         core.info(`- platform:     ${platform}`);
@@ -111,13 +111,13 @@ function installDevspace(platform, architecture, version) {
         const devspaceUrl = yield binaryUrl(platform, architecture, sanitizedVerson);
         const downloadDir = yield tc.downloadTool(devspaceUrl);
         const cliDir = yield tc.cacheFile(downloadDir, cliName, cliName, sanitizedVerson, architecture);
-        const cliPath = path.join(cliDir, cliName);
+        const cliPath = (0, path_1.join)(cliDir, cliName);
         if (!(0, util_1.isWindows)(platform)) {
             fs.chmodSync(cliPath, 0o555);
         }
         core.info(`Successfully downloaded devspace: ${sanitizedVerson}`);
         core.addPath(cliDir);
-        return path.join(cliDir, cliName);
+        return (0, path_1.join)(cliDir, cliName);
     });
 }
 exports.installDevspace = installDevspace;
@@ -165,11 +165,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.installKubectl = exports.getLatestVersion = exports.binaryUrl = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const exec_1 = __nccwpck_require__(514);
-const io = __importStar(__nccwpck_require__(436));
-const tc = __importStar(__nccwpck_require__(784));
-const fs = __importStar(__nccwpck_require__(747));
+const io_1 = __nccwpck_require__(436);
+const tool_cache_1 = __nccwpck_require__(784);
+const fs_1 = __nccwpck_require__(747);
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
-const path = __importStar(__nccwpck_require__(622));
+const path_1 = __nccwpck_require__(622);
 const util_1 = __nccwpck_require__(24);
 function binaryUrl(platform, architecture, version) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -223,7 +223,7 @@ function installKubectl(platform, architecture, version) {
         }
         sanitizedVerson = (0, util_1.getGitVersion)(sanitizedVerson);
         core.info(`Checking for installed kubectl: ${sanitizedVerson}`);
-        const existingCliPath = yield io.which(cliName);
+        const existingCliPath = yield (0, io_1.which)(cliName);
         if (existingCliPath !== '') {
             const installedVersion = yield getInstalledVersion();
             core.info(`Found installed kubectl: ${installedVersion}`);
@@ -233,26 +233,26 @@ function installKubectl(platform, architecture, version) {
             }
         }
         core.info(`Checking for cached kubectl: ${sanitizedVerson}`);
-        const cachedDir = tc.find(cliName, sanitizedVerson);
+        const cachedDir = (0, tool_cache_1.find)(cliName, sanitizedVerson);
         if (cachedDir) {
             core.info(`Found cached kubectl: ${sanitizedVerson}`);
             core.addPath(cachedDir);
-            return path.join(cachedDir, cliName);
+            return (0, path_1.join)(cachedDir, cliName);
         }
         core.info(`Downloading kubectl:`);
         core.info(`- platform:     ${platform}`);
         core.info(`- architecture: ${architecture}`);
         core.info(`- version:      ${sanitizedVerson}`);
         const kubectlUrl = yield binaryUrl(platform, architecture, sanitizedVerson);
-        const downloadDir = yield tc.downloadTool(kubectlUrl);
-        const cliDir = yield tc.cacheFile(downloadDir, cliName, cliName, sanitizedVerson, architecture);
-        const cliPath = path.join(cliDir, cliName);
+        const downloadDir = yield (0, tool_cache_1.downloadTool)(kubectlUrl);
+        const cliDir = yield (0, tool_cache_1.cacheFile)(downloadDir, cliName, cliName, sanitizedVerson, architecture);
+        const cliPath = (0, path_1.join)(cliDir, cliName);
         if (!(0, util_1.isWindows)(platform)) {
-            fs.chmodSync(cliPath, 0o555);
+            (0, fs_1.chmodSync)(cliPath, 0o555);
         }
         core.info(`Successfully downloaded kubectl: ${sanitizedVerson}`);
         core.addPath(cliDir);
-        return path.join(cliDir, cliName);
+        return (0, path_1.join)(cliDir, cliName);
     });
 }
 exports.installKubectl = installKubectl;

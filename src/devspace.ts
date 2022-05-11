@@ -1,8 +1,9 @@
 import * as core from '@actions/core'
 import * as tc from '@actions/tool-cache'
 import * as fs from 'fs'
-import * as path from 'path'
 import fetch from 'node-fetch'
+import {join} from 'path'
+
 import {
   binaryName,
   getArchitecture,
@@ -81,7 +82,7 @@ export async function installDevspace(
   if (cachedDir) {
     core.info(`Cached devspace found: ${sanitizedVerson}`)
     core.addPath(cachedDir)
-    return path.join(cachedDir, cliName)
+    return join(cachedDir, cliName)
   }
 
   core.info(`Downloading devspace:`)
@@ -98,12 +99,12 @@ export async function installDevspace(
     architecture
   )
 
-  const cliPath = path.join(cliDir, cliName)
+  const cliPath = join(cliDir, cliName)
   if (!isWindows(platform)) {
     fs.chmodSync(cliPath, 0o555)
   }
 
   core.info(`Successfully downloaded devspace: ${sanitizedVerson}`)
   core.addPath(cliDir)
-  return path.join(cliDir, cliName)
+  return join(cliDir, cliName)
 }
