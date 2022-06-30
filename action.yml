@@ -9,9 +9,9 @@ inputs:
   kubectl-install:
     description: 'Install kubectl if not already installed'
     required: false
-    default: false
+    default: 'false'
   kubectl-version:
-    decription: 'The version of the kubectl to install'
+    description: 'The version of the kubectl to install'
     required: false
     default: 'latest'
 runs:

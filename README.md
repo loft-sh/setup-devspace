@@ -78,6 +78,6 @@ The following inputs can be used as `step.with` keys
 
 | Name                     | Type     | Description                                          |
 |--------------------------|----------|------------------------------------------------------|
-| `version`                | String   | The version of DevSpace CLI to install. See [DevSpace Releases](https://github.com/loft-sh/devspace/releases), for available versions.
-| `kubectl-install`        | Boolean  | Install kubectl if not already installed
-| `kubectl-version`        | String   | The version of the kubectl to install
+| `version`                | String   | The version of DevSpace CLI to install. See [DevSpace Releases](https://github.com/loft-sh/devspace/releases), for available versions. Defaults to `latest`.
+| `kubectl-install`        | Boolean  | Install kubectl if not already installed. Disabled by default.
+| `kubectl-version`        | String   | The version of the kubectl to install. Defaults to `latest`.
