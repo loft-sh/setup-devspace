@@ -27,11 +27,11 @@
     "@actions/exec": "^1.1.1",
     "@actions/io": "^1.1.2",
     "@actions/tool-cache": "^2.0.1",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.8"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
-    "@types/node-fetch": "^2.6.1",
+    "@types/node-fetch": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "@vercel/ncc": "^0.36.0",
