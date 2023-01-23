@@ -40,12 +40,12 @@ export async function binaryUrl(
   sanitizedVerson = getGitVersion(sanitizedVerson)
 
   const binaryExt = isWindows(platform) ? '.exe' : ''
-  return `https://github.com/loft-sh/devspace/releases/download/${sanitizedVerson}/devspace-${sanitizedPlatform}-${sanitizedArchitecture}${binaryExt}`
+  return `https://github.com/devspace-sh/devspace/releases/download/${sanitizedVerson}/devspace-${sanitizedPlatform}-${sanitizedArchitecture}${binaryExt}`
 }
 
 export async function getLatestVersion(): Promise<string> {
   const response = await fetch(
-    'https://github.com/loft-sh/devspace/releases/latest',
+    'https://github.com/devspace-sh/devspace/releases/latest',
     {
       redirect: 'manual'
     }
