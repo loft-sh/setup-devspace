@@ -71,13 +71,13 @@ function binaryUrl(platform, architecture, version) {
         }
         sanitizedVerson = (0, util_1.getGitVersion)(sanitizedVerson);
         const binaryExt = (0, util_1.isWindows)(platform) ? '.exe' : '';
-        return `https://github.com/loft-sh/devspace/releases/download/${sanitizedVerson}/devspace-${sanitizedPlatform}-${sanitizedArchitecture}${binaryExt}`;
+        return `https://github.com/devspace-sh/devspace/releases/download/${sanitizedVerson}/devspace-${sanitizedPlatform}-${sanitizedArchitecture}${binaryExt}`;
     });
 }
 exports.binaryUrl = binaryUrl;
 function getLatestVersion() {
     return __awaiter(this, void 0, void 0, function* () {
-        const response = yield (0, node_fetch_1.default)('https://github.com/loft-sh/devspace/releases/latest', {
+        const response = yield (0, node_fetch_1.default)('https://github.com/devspace-sh/devspace/releases/latest', {
             redirect: 'manual'
         });
         const redirectUrl = response.headers.get('location');
