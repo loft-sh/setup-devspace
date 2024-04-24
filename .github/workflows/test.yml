@@ -71,7 +71,7 @@ jobs:
           version: latest
           kubectl-install: true
           kubectl-version: ${{ matrix.kubectl-version }}
-      - run: kubectl version --client --short
+      - run: kubectl version --client
       
   # Auto Approve passing Dependabot Patch & Minor PRs
   auto-approve-dependabot:
